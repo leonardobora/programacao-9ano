@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador da Copa 2026</title>
+    <style>
+        /* CSS Variável - Esquema de Cores Neutras */
+        :root {
+            --bg-color: #f5f5f5;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --border-color: #cccccc;
+            --btn-bg: #555555;
+            --btn-hover: #333333;
+            --input-bg: #fafafa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            color: var(--text-main);
+        }
+
+        .simulator-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .match-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .match-row:last-of-type {
+            border-bottom: none;
+            margin-bottom: 1rem;
+        }
+
+        .team {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .team.away {
+            justify-content: flex-end;
+        }
+
+        .score-inputs {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        input[type="number"] {
+            width: 60px;
+            height: 40px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--input-bg);
+            color: var(--text-main);
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--text-muted);
+        }
+
+        .separator {
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: var(--btn-bg);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background-color: var(--btn-hover);
+        }
+
+        #resultado-box {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1.2rem;
+            display: none; /* Escondido por padrão */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>[NOME DO GRUPO E INTEGRANTES AQUI]</h1>
+
+    <div class="simulator-card">
+        
+        <div class="match-row" id="match1">
+            <div class="team home">
+                <span>Brasil</span> <span>[FLAG]</span>
+            </div>
+            <div class="score-inputs">
+                <input type="number" id="br-score-1" min="0" placeholder="0">
+                <span class="separator">X</span>
+                <input type="number" id="op-score-1" min="0" placeholder="0">
+            </div>
+            <div class="team away">
+                <span>[FLAG]</span> <span>Marrocos</span>
+            </div>
+        </div>
+
+        <div class="match-row" id="match2">
+            <div class="team home">
+                <span>Brasil</span> <span>[FLAG]</span>
+            </div>
+            <div class="score-inputs">
+                <input type="number" id="br-score-2" min="0" placeholder="0">
+                <span class="separator">X</span>
+                <input type="number" id="op-score-2" min="0" placeholder="0">
+            </div>
+            <div class="team away">
+                <span>[FLAG]</span> <span>Haiti</span>
+            </div>
+        </div>
+
+        <div class="match-row" id="match3">
+            <div class="team home">
+                <span>Brasil</span> <span>[FLAG]</span>
+            </div>
+            <div class="score-inputs">
+                <input type="number" id="br-score-3" min="0" placeholder="0">
+                <span class="separator">X</span>
+                <input type="number" id="op-score-3" min="0" placeholder="0">
+            </div>
+            <div class="team away">
+                <span>[FLAG]</span> <span>Escócia</span>
+            </div>
+        </div>
+
+        <button onclick="calcularClassificacao()">Calcular Classificação</button>
+
+        <div id="resultado-box"></div>
+    </div>
+
+    <script>
+        function calcularClassificacao() {
+            let pontosBrasil = 0;
+            const totalJogos = 3;
+            let camposValidos = true;
+
+            // Loop para processar os 3 jogos
+            for (let i = 1; i <= totalJogos; i++) {
+                const brInput = document.getElementById(`br-score-${i}`).value;
+                const opInput = document.getElementById(`op-score-${i}`).value;
+
+                // Validação para garantir que os inputs não estejam vazios
+                if (brInput === '' || opInput === '') {
+                    camposValidos = false;
+                    break;
+                }
+
+                const golsBr = parseInt(brInput, 10);
+                const golsOp = parseInt(opInput, 10);
+
+                // Lógica de pontos: Vitória (3), Empate (1), Derrota (0)
+                if (golsBr > golsOp) {
+                    pontosBrasil += 3;
+                } else if (golsBr === golsOp) {
+                    pontosBrasil += 1;
+                }
+            }
+
+            const resultadoBox = document.getElementById('resultado-box');
+            resultadoBox.style.display = 'block';
+
+            if (!camposValidos) {
+                resultadoBox.innerHTML = `<strong>Aviso:</strong> Por favor, preencha todos os placares antes de calcular.`;
+                return;
+            }
+
+            let mensagem = `<strong>Total: ${pontosBrasil} pontos.</strong><br>`;
+
+            // Avaliação do cenário (incluindo 5 pontos matematicamente possíveis com 1 vitória e 2 empates)
+            if (pontosBrasil >= 7) {
+                mensagem += "Classificado em 1º! Rumo ao Hexa!";
+            } else if (pontosBrasil >= 4 && pontosBrasil <= 6) {
+                mensagem += "Classificado, mas com emoção!";
+            } else {
+                mensagem += "Tragédia! Eliminado.";
+            }
+
+            resultadoBox.innerHTML = mensagem;
+        }
+    </script>
+</body>
+</html>
